@@ -143,9 +143,19 @@ bool imageConverter::Convert( sensor_msgs::Image& msg, const std::string& encodi
 	}
 	else if( encoding == sensor_msgs::image_encodings::MONO8 )
 	{
+		if( CUDA_FAILED(cudaRGBA32ToMONO8((float4*)imageGPU, (unsigned char*)mInputGPU, mWidth, mHeight)) )
+		{
+			ROS_ERROR("failed to convert %ux%u RGBA32 image to MONO8 with CUDA", mWidth, mHeight);
+			return false;
+		}
+
+		px_depth = sizeof(unsigned char);
+	}
+	/*else if( encoding == sensor_msgs::image_encodings::MONO8 )
+	{
 		px_depth = sizeof(uint8_t);	// assumes imageGPU is actually uint8, not float4	
 		in_place = true;	
-	}
+	}*/
 	else
 	{
 		ROS_ERROR("image_converter -- unsupported format requested '%s'", encoding.c_str());

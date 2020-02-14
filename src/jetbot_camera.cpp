@@ -59,24 +59,24 @@ bool aquireFrame()
 
 	// populate the message
 	sensor_msgs::Image msg;
+	msg.header.stamp = ros::Time::now();
 
-	if( !camera_cvt->Convert(msg, sensor_msgs::image_encodings::BGR8, imgRGBA) )
+	if( !camera_cvt->Convert(msg, sensor_msgs::image_encodings::MONO8, imgRGBA) )
 	{
 		ROS_ERROR("failed to convert camera frame to sensor_msgs::Image");
 		return false;
-	}
+	}	
 
 	// publish the message
 	camera_pub->publish(msg);
-	ROS_INFO("published camera frame");
+	//ROS_INFO("published camera frame");
 	return true;
 }
-
 
 // node main loop
 int main(int argc, char **argv)
 {
-	ros::init(argc, argv, "jetbot_camera");
+	ros::init(argc, argv, "cam0");
  
 	ros::NodeHandle nh;
 	ros::NodeHandle private_nh("~");
@@ -94,7 +94,7 @@ int main(int argc, char **argv)
 	/*
 	 * open camera device
 	 */
-	camera = gstCamera::Create(camera_device.c_str());
+	camera = gstCamera::Create(640, 360, camera_device.c_str(), true); //gstCamera::Create(1280, 720, camera_device.c_str());
 
 	if( !camera )
 	{
@@ -118,7 +118,7 @@ int main(int argc, char **argv)
 	/*
 	 * advertise publisher topics
 	 */
-	ros::Publisher camera_publisher = private_nh.advertise<sensor_msgs::Image>("raw", 2);
+	ros::Publisher camera_publisher = private_nh.advertise<sensor_msgs::Image>("image_raw", 2);
 	camera_pub = &camera_publisher;
 
 
